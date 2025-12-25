@@ -7,18 +7,35 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  User
+  Admin
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+  id       Int      @id @default(autoincrement())
+  name     String?
+  email    String   @unique
+  role     Role     @default(User)
+  posts    Post[]
+  profiles Profile?
+}
+
+model Profile {
+  id          Int       @id @default(autoincrement())
+  bio         String?
+  dateOfBirth DateTime?
+  userId      Int       @unique
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String?
+  isPublished Boolean  @default(false)
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
