@@ -3,7 +3,7 @@
 | Date        | Module      | Description                                                                                                                                                           |
 | :---------- | :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dec 24 2025 | `Module-22` | [Prisma ORM Fundamentals](https://web.programming-hero.com/level2-batch-6/post/level2-batch-6-module-22-text-instructions)                    |
-| Dec 10 2025 | `Module-` | []()                       |
+| Dec 26 2025 | `Module-23` | [Requirement Analysis, ERD & Project Setup](https://web.programming-hero.com/level2-batch-6/post/level2-batch-6-module-23-text-instructions)                       |
 | Dec 12 2025 | `Module-` | []()          |
 | Dec 14 2025 | `Module-` | []()                   |
 | Dec 17 2025 | `Module-` | []()                           |
