@@ -5,10 +5,10 @@ import { prisma } from "./lib/prisma"
 async function main() {
 	try {
 		await prisma.$connect();
-		console.log("Connected to the database successfully.");
+		console.log("✅ Connected to the database successfully.");
 
 		app.listen(config.port, () => {
-			console.log(`Server is running on port http://localhost:${config.port}/api/v1`);
+			console.log(`🔗 Server is running on port http://localhost:${config.port}`);
 		});
 	} catch (error: any) {
 		console.log("An error occurred: ", error);
