@@ -45,6 +45,7 @@ export const auth = betterAuth({
     },
     emailVerification: {
         sendOnSignUp: true,
+        autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url, token }, request) => {
             try {
                 const verificationURL =
@@ -120,4 +121,12 @@ export const auth = betterAuth({
             }
         },
     },
+    socialProviders: {
+        google: {
+            accessType: "offline",
+            prompt: "select_account consent",
+            clientId: config.google.client_id as string,
+            clientSecret: config.google.client_secret as string,
+        }
+    }
 });

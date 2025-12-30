@@ -17,6 +17,10 @@ const config = {
 		email: process.env.NODEMAILER_EMAIL,
 		email_pass: process.env.NODEMAILER_EMAIL_PASS,
 	},
+	google: {
+		client_id: process.env.GOOGLE_CLIENT_ID,
+		client_secret: process.env.GOOGLE_CLIENT_SECRET,
+	}
 };
 
 export default config;
