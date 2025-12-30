@@ -21,7 +21,7 @@ app.get('/', (req: Request, res: Response) => {
 
 //* Routes
 app.all('/api/auth/*splat', toNodeHandler(auth));
-app.use("/api/v1/posts", postRouter);
+app.use("/api/posts", postRouter);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
