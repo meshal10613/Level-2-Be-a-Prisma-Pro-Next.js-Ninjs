@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { postController } from "./post.controller";
 import auth, { UserRole } from "../../middleware/auth";
 
 const router = Router();
+
+router.get("/", postController.getAllPosts);
 
 router.post(
     "/",
