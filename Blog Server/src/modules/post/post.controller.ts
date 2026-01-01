@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { postService } from "./post.service";
+import { boolean } from "zod";
+import { tr } from "zod/v4/locales";
+import { PostStatus } from "../../../generated/prisma/enums";
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -33,7 +36,21 @@ const getAllPosts = async (req: Request, res: Response) => {
         const tags = req.query.tags
             ? (req.query.tags as string).split(",")
             : [];
-        const result = await postService.getAllPosts( search, tags );
+        const isFeatured = req.query.isFeatured
+            ? req.query.isFeatured === "true"
+                ? true
+                : req.query.isFeatured === "false"
+                ? false
+                : undefined
+            : undefined;
+        const status = req.query.status as PostStatus | undefined;
+
+        const result = await postService.getAllPosts({
+            search,
+            tags,
+            isFeatured,
+            status,
+        });
         res.status(200).json({
             success: true,
             message: "Posts retrieved successfully",
