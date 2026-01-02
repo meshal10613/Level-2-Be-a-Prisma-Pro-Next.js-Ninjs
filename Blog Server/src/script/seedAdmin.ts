@@ -1,4 +1,3 @@
-import { error } from "node:console";
 import { prisma } from "../lib/prisma";
 import { UserRole } from "../middleware/auth";
 

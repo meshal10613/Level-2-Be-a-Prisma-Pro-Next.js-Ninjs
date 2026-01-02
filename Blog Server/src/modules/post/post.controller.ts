@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { postService } from "./post.service";
-import { boolean } from "zod";
-import { tr } from "zod/v4/locales";
 import { PostStatus } from "../../../generated/prisma/enums";
 
 const createPost = async (req: Request, res: Response) => {
@@ -44,12 +42,16 @@ const getAllPosts = async (req: Request, res: Response) => {
                 : undefined
             : undefined;
         const status = req.query.status as PostStatus | undefined;
+        const page = Number(req.query.page ?? 1);
+        const limit = Number(req.query.limit ?? 10);
 
         const result = await postService.getAllPosts({
             search,
             tags,
             isFeatured,
             status,
+            page,
+            limit
         });
         res.status(200).json({
             success: true,
