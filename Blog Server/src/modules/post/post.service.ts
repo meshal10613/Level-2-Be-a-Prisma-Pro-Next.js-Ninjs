@@ -18,7 +18,7 @@ const getAllPosts = async ({
     isFeatured,
     status,
     page,
-    limit
+    limit,
 }: {
     search: string | undefined;
     tags: string[] | [];
