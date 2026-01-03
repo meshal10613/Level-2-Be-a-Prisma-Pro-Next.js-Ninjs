@@ -44,7 +44,7 @@ const getAllPosts = async (req: Request, res: Response) => {
             : undefined;
         const status = req.query.status as PostStatus | undefined;
 
-        const { limit, skip, sortBy, sortOrder } = paginationAndSorting(
+        const { page, limit, skip, sortBy, sortOrder } = paginationAndSorting(
             req.query
         );
 
@@ -53,6 +53,7 @@ const getAllPosts = async (req: Request, res: Response) => {
             tags,
             isFeatured,
             status,
+            page,
             limit,
             skip,
             sortBy,
@@ -61,9 +62,25 @@ const getAllPosts = async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             message: "Posts retrieved successfully",
-            totalPost: result.length,
-            data: result,
+            ...result,
         });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
+const getPostById = async (req: Request, res: Response) => {
+    try {
+        const result = await postService.getPostById(req.params.id as string);
+        res.status(200).json({
+            success: true,
+            message: "Post retrieved successfully",
+            data: result,
+        })
     } catch (error: any) {
         res.status(500).json({
             success: false,
@@ -76,4 +93,5 @@ const getAllPosts = async (req: Request, res: Response) => {
 export const postController = {
     createPost,
     getAllPosts,
+    getPostById
 };

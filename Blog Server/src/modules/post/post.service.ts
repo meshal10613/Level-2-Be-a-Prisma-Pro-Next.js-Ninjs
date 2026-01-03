@@ -17,6 +17,7 @@ const getAllPosts = async ({
     tags,
     isFeatured,
     status,
+    page,
     limit,
     skip,
     sortBy,
@@ -26,6 +27,7 @@ const getAllPosts = async ({
     tags: string[] | [];
     isFeatured?: boolean | undefined;
     status?: PostStatus | undefined;
+    page: number;
     limit: number;
     skip: number;
     sortBy: string;
@@ -75,21 +77,61 @@ const getAllPosts = async ({
             status,
         });
     }
-    console.log({sortBy, sortOrder})
+
     const result = await prisma.post.findMany({
         take: limit,
         skip: skip,
         where: {
             AND: andConditions,
         },
-        orderBy:{
-            [sortBy]: sortOrder
-        }
+        orderBy: {
+            [sortBy]: sortOrder,
+        },
     });
+
+    const totalDatas = await prisma.post.count();
+
+    const total = await prisma.post.count({
+        where: {
+            AND: andConditions,
+        },
+    });
+
+    return {
+        pagination: {
+            totalDatas,
+            totalMatchedDatas: total,
+            totalDatasOnCurrentPage: result.length,
+            currentPage: page,
+            pageSize: limit,
+            totalPages: Math.ceil(total / limit),
+        },
+        data: result,
+    };
+};
+
+const getPostById = async (id: string) => {
+    const result = await prisma.$transaction(async (tx) => {
+        const post = await tx.post.findUnique({ where: { id } });
+        if (!post) {
+            throw new Error("Post not found");
+        }
+        const updateViewCount = await tx.post.update({
+            where: { id },
+            data: {
+                views: {
+                    increment: 1,
+                },
+            },
+        });
+        return updateViewCount;
+    });
+
     return result;
 };
 
 export const postService = {
     createPost,
     getAllPosts,
+    getPostById,
 };
