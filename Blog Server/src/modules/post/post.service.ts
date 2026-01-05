@@ -1,5 +1,9 @@
 import { includes } from "zod";
-import { CommentStatus, Post, PostStatus } from "../../../generated/prisma/client";
+import {
+    CommentStatus,
+    Post,
+    PostStatus,
+} from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -88,6 +92,13 @@ const getAllPosts = async ({
         orderBy: {
             [sortBy]: sortOrder,
         },
+        include: {
+            _count: {
+                select: {
+                    comments: true,
+                },
+            }
+        }
     });
 
     const totalDatas = await prisma.post.count();
@@ -127,22 +138,34 @@ const getPostById = async (id: string) => {
                 comments: {
                     where: {
                         parentId: null,
-                        status: CommentStatus.APPROVED
+                        status: CommentStatus.APPROVED,
+                    },
+                    orderBy: {
+                        createdAt: "desc",
                     },
                     include: {
                         replies: {
                             where: {
-                                status: CommentStatus.APPROVED
+                                status: CommentStatus.APPROVED,
+                            },
+                            orderBy: {
+                                createdAt: "asc",
                             },
                             include: {
                                 replies: {
                                     where: {
-                                        status: CommentStatus.APPROVED
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                        status: CommentStatus.APPROVED,
+                                    },
+                                    orderBy: {
+                                        createdAt: "asc",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                _count: {
+                    select: { comments: true },
                 },
             },
         });
