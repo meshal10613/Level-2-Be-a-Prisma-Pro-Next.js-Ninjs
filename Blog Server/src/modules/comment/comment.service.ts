@@ -1,5 +1,6 @@
 import { title } from "node:process";
 import { prisma } from "../../lib/prisma";
+import { CommentStatus } from "../../../generated/prisma/enums";
 
 const getCommentById = async (id: string) => {
     return await prisma.comment.findUniqueOrThrow({
@@ -69,14 +70,14 @@ const deleteCommentById = async (commentId: string, authorId: string) => {
     const commentData = await prisma.comment.findFirstOrThrow({
         where: {
             id: commentId,
-            authorId
+            authorId,
         },
         select: {
-            id: true
-        }
+            id: true,
+        },
     });
 
-    if(!commentData) {
+    if (!commentData) {
         throw new Error("You are not authorized to delete this comment");
     }
 
@@ -87,9 +88,41 @@ const deleteCommentById = async (commentId: string, authorId: string) => {
     });
 };
 
+const updateCommentById = async (
+    commentId: string,
+    authorId: string,
+    data: {
+        content?: string;
+        status?: CommentStatus;
+    }
+) => {
+    const commentData = await prisma.comment.findFirstOrThrow({
+        where: {
+            id: commentId,
+            authorId,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    if (!commentData) {
+        throw new Error("You are not authorized to delete this comment");
+    }
+
+    return await prisma.comment.update({
+        where: {
+            id: commentData.id,
+            authorId
+        },
+        data,
+    })
+};
+
 export const commentService = {
     getCommentById,
     getCommentByAuthorId,
     createComment,
     deleteCommentById,
+    updateCommentById,
 };

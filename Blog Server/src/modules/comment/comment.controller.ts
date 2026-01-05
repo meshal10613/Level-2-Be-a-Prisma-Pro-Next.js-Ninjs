@@ -61,11 +61,37 @@ const createComment = async (req: Request, res: Response) => {
 const deleteCommentById = async (req: Request, res: Response) => {
     try {
         const user = req?.user;
-        const {commentId} = req.params;
-        const result = await commentService.deleteCommentById(commentId as string, user?.id as string);
+        const { commentId } = req.params;
+        const result = await commentService.deleteCommentById(
+            commentId as string,
+            user?.id as string
+        );
         res.status(200).json({
             success: true,
             message: "Comment deleted successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
+const updateCommentById = async (req: Request, res: Response) => {
+    try {
+        const user = req?.user;
+        const { commentId } = req.params;
+        const result = await commentService.updateCommentById(
+            commentId as string,
+            user?.id as string,
+            req.body
+        );
+        res.status(200).json({
+            success: true,
+            message: "Comment updated successfully",
             data: result,
         });
     } catch (error: any) {
@@ -82,4 +108,5 @@ export const commentController = {
     getCommentByAuthorId,
     createComment,
     deleteCommentById,
+    updateCommentById
 };
