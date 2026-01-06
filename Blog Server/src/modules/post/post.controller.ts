@@ -94,6 +94,32 @@ const getMyPost = async (req: Request, res: Response) => {
     }
 };
 
+const updatePost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            throw new Error("Unauthorized Access!");
+        }
+        const { postId } = req.params;
+        const result = await postService.updatePost(
+            postId as string,
+            req.body,
+            user.id
+        );
+        res.status(200).json({
+            success: true,
+            message: "Post updated successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
 const getPostById = async (req: Request, res: Response) => {
     try {
         const result = await postService.getPostById(req.params.id as string);
@@ -115,5 +141,6 @@ export const postController = {
     createPost,
     getAllPosts,
     getMyPost,
+    updatePost,
     getPostById,
 };
