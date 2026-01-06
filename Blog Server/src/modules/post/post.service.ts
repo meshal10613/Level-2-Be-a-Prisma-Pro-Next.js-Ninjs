@@ -6,6 +6,7 @@ import {
 } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { tr } from "zod/v4/locales";
 
 const createPost = async (
     data: Omit<Post, "id" | "createdAt" | "updatedAt" | "authorId">,
@@ -97,8 +98,8 @@ const getAllPosts = async ({
                 select: {
                     comments: true,
                 },
-            }
-        }
+            },
+        },
     });
 
     const totalDatas = await prisma.post.count();
@@ -122,9 +123,44 @@ const getAllPosts = async ({
     };
 };
 
+const getMyPost = async (authorId: string) => {
+    await prisma.user.findUniqueOrThrow({
+        where: {
+            id: authorId,
+            status: "ACTIVE"
+        },
+        select: {
+            id: true,
+        }
+    });
+
+    const result = await prisma.post.findMany({
+        where: {
+            authorId,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+
+    const total = await prisma.post.aggregate({
+        _count: {
+            id: true,
+        },
+        where: {
+            authorId
+        }
+    });
+
+    return {
+        total,
+        data: result,
+    };
+};
+
 const getPostById = async (id: string) => {
     const result = await prisma.$transaction(async (tx) => {
-        const updateViewCount = await tx.post.update({
+        const updateViewCount = await tx.post.updateMany({
             where: { id },
             data: {
                 views: {
@@ -169,6 +205,7 @@ const getPostById = async (id: string) => {
                 },
             },
         });
+
         return post;
     });
 
@@ -178,5 +215,6 @@ const getPostById = async (id: string) => {
 export const postService = {
     createPost,
     getAllPosts,
+    getMyPost,
     getPostById,
 };

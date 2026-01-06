@@ -73,6 +73,27 @@ const getAllPosts = async (req: Request, res: Response) => {
     }
 };
 
+const getMyPost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            throw new Error("Unauthorized Access!");
+        }
+        const result = await postService.getMyPost(user?.id as string);
+        res.status(200).json({
+            success: true,
+            message: "Post retrieved successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
 const getPostById = async (req: Request, res: Response) => {
     try {
         const result = await postService.getPostById(req.params.id as string);
@@ -80,7 +101,7 @@ const getPostById = async (req: Request, res: Response) => {
             success: true,
             message: "Post retrieved successfully",
             data: result,
-        })
+        });
     } catch (error: any) {
         res.status(500).json({
             success: false,
@@ -93,5 +114,6 @@ const getPostById = async (req: Request, res: Response) => {
 export const postController = {
     createPost,
     getAllPosts,
-    getPostById
+    getMyPost,
+    getPostById,
 };
