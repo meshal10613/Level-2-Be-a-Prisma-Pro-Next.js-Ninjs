@@ -7,6 +7,7 @@ import {
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { tr } from "zod/v4/locales";
+import { UserRole } from "../../middleware/auth";
 
 const createPost = async (
     data: Omit<Post, "id" | "createdAt" | "updatedAt" | "authorId">,
@@ -161,7 +162,8 @@ const getMyPost = async (authorId: string) => {
 const updatePost = async (
     postId: string,
     data: Partial<Post>,
-    authorId: string
+    authorId: string,
+    isAdmin: boolean
 ) => {
     const postData = await prisma.post.findUniqueOrThrow({
         where: {
@@ -173,8 +175,12 @@ const updatePost = async (
         },
     });
 
-    if (postData.authorId !== authorId) {
+    if (!isAdmin && postData.authorId !== authorId) {
         throw new Error("You are not authorized to update this post");
+    }
+
+    if (!isAdmin && data.isFeatured) {
+        delete data.isFeatured;
     }
 
     const result = await prisma.post.update({
@@ -241,10 +247,107 @@ const getPostById = async (id: string) => {
     return result;
 };
 
+const deletePost = async (
+    postId: string,
+    authorId: string,
+    isAdmin: boolean
+) => {
+    const postData = await prisma.post.findUniqueOrThrow({
+        where: {
+            id: postId,
+        },
+        select: {
+            id: true,
+            authorId: true,
+        },
+    });
+
+    if (!isAdmin && postData.authorId !== authorId) {
+        throw new Error("You are not authorized to delete this post");
+    }
+
+    return await prisma.post.delete({
+        where: {
+            id: postData.id,
+        },
+    });
+};
+
+const getStats = async () => {
+    return await prisma.$transaction(async (tx) => {
+        const [
+            totalUser,
+            totalAdmin,
+            totalPost,
+            publishedPost,
+            draftPost,
+            archivedPost,
+            totalComments,
+            approvedComments,
+            rejectedComments,
+            totalViews,
+        ] = await Promise.all([
+            await tx.user.count(),
+            await tx.user.count({
+                where: {
+                    role: UserRole.ADMIN,
+                },
+            }),
+            await tx.post.count(),
+            await tx.post.count({
+                where: {
+                    status: "PUBLISHED",
+                },
+            }),
+            await tx.post.count({
+                where: {
+                    status: "DRAFT",
+                },
+            }),
+            await tx.post.count({
+                where: {
+                    status: "ARCHIVED",
+                },
+            }),
+            await tx.comment.count(),
+            await tx.comment.count({
+                where: {
+                    status: CommentStatus.APPROVED,
+                },
+            }),
+            await tx.comment.count({
+                where: {
+                    status: CommentStatus.REJECT,
+                },
+            }),
+            await tx.post.aggregate({
+                _sum: {
+                    views: true,
+                }
+            })
+        ]);
+
+        return {
+            totalUser,
+            totalAdmin,
+            totalPost,
+            publishedPost,
+            draftPost,
+            archivedPost,
+            totalComments,
+            approvedComments,
+            rejectedComments,
+            totalViews: totalViews._sum.views,
+        };
+    });
+};
+
 export const postService = {
     createPost,
     getAllPosts,
     getMyPost,
     updatePost,
     getPostById,
+    deletePost,
+    getStats,
 };

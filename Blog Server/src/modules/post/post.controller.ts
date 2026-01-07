@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationAndSorting from "../../helper/pagination_sorting.helper";
+import { UserRole } from "../../middleware/auth";
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -101,10 +102,12 @@ const updatePost = async (req: Request, res: Response) => {
             throw new Error("Unauthorized Access!");
         }
         const { postId } = req.params;
+        const isAdmin = user.role === UserRole.ADMIN;
         const result = await postService.updatePost(
             postId as string,
             req.body,
-            user.id
+            user.id,
+            isAdmin
         );
         res.status(200).json({
             success: true,
@@ -137,10 +140,55 @@ const getPostById = async (req: Request, res: Response) => {
     }
 };
 
+const deletePost = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            throw new Error("Unauthorized Access!");
+        }
+        const isAdmin = user.role === UserRole.ADMIN;
+        const result = await postService.deletePost(
+            req.params.postId as string,
+            user.id as string,
+            isAdmin
+        );
+        res.status(200).json({
+            success: true,
+            message: "Post deleted successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
+const getStats = async (req: Request, res: Response) => {
+    try {
+        const result = await postService.getStats();
+        res.status(200).json({
+            success: true,
+            message: "Stats retrieved successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
+
 export const postController = {
     createPost,
     getAllPosts,
     getMyPost,
     updatePost,
     getPostById,
+    deletePost,
+    getStats,
 };
