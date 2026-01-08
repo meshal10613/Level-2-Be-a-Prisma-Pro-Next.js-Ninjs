@@ -5,6 +5,7 @@ import { postRouter } from './modules/post/post.router';
 import { auth } from './lib/auth';
 import config from './config';
 import { commentRouter } from './modules/comment/comment.router';
+import globalErrorHandler from './middleware/globalErrorHandler';
 
 const app: Application = express();
 
@@ -25,6 +26,7 @@ app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use("/api/posts", postRouter);
 app.use("/api/comments", commentRouter);
 
+app.use(globalErrorHandler);
 app.use((req: Request, res: Response) => {
     res.status(404).json({
         path: req.url,
