@@ -11,34 +11,45 @@ function globalErrorHandler(
     let errorMessage = "Internal Server Error";
     let errorDetails = err;
 
-    //? PrismaClientValidationError
+    // PrismaClientValidationError
     if (err instanceof Prisma.PrismaClientValidationError) {
         statusCode = 400;
-        errorMessage = "You provided invalid data";
-        errorDetails = err;
+        errorMessage = "You provide incorrect field type or missing fields!";
     }
-
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === "P2002") {
+    // PrismaClientKnownRequestError
+    else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === "P2025") {
             statusCode = 400;
             errorMessage =
                 "An operation failed because it depends on one or more records that were required but not found.";
+        } else if (err.code === "P2002") {
+            statusCode = 400;
+            errorMessage = "Duplicate key error";
+        } else if (err.code === "P2003") {
+            statusCode = 400;
+            errorMessage = "Foreign key constraint failed";
         }
-
-		if(err.code === "P2002"){
-			statusCode = 400;
-			errorMessage = "Duplicate key error";
-		}
+    } else if (err instanceof Prisma.PrismaClientUnknownRequestError) {
+        statusCode = 500;
+        errorMessage = "Error occurred during query execution";
+    } else if (err instanceof Prisma.PrismaClientInitializationError) {
+        if (err.errorCode === "P1000") {
+            statusCode = 401;
+            errorMessage =
+                "Authentication failed. Please check your creditials!";
+        } else if (err.errorCode === "P1001") {
+            statusCode = 400;
+            errorMessage = "Can't reach database server";
+        }
+    } else if (err instanceof Prisma.PrismaClientRustPanicError) {
+        statusCode = 500;
+        errorMessage = "Prisma engine crashed!";
     }
 
-    // const statusCode = err.statusCode || 500;
-    // const message = err.message || "Internal Server Error";
-    // const errors = err || [];
-
-    res.status(statusCode).json({
-        success: false,
+    res.status(statusCode);
+    res.json({
         message: errorMessage,
-        errors: errorDetails,
+        error: errorDetails,
     });
 }
 
