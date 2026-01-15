@@ -1,12 +1,12 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
-// import {
-//     Breadcrumb,
-//     BreadcrumbItem,
-//     BreadcrumbLink,
-//     BreadcrumbList,
-//     BreadcrumbPage,
-//     BreadcrumbSeparator,
-// } from "@/components/ui/breadcrumb";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
     SidebarInset,
@@ -15,10 +15,17 @@ import {
 } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({
-    children,
+    admin,
+    user,
 }: Readonly<{
     children: React.ReactNode;
+    admin: React.ReactNode;
+    user: React.ReactNode;
 }>) {
+    const userInfo = {
+        role: "admin"
+    }
+
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -30,7 +37,7 @@ export default function DashboardLayout({
                             orientation="vertical"
                             className="mr-2 data-[orientation=vertical]:h-4"
                         />
-                        {/* <Breadcrumb>
+                        <Breadcrumb>
                             <BreadcrumbList>
                                 <BreadcrumbItem className="hidden md:block">
                                     <BreadcrumbLink href="#">
@@ -44,11 +51,11 @@ export default function DashboardLayout({
                                     </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
-                        </Breadcrumb> */}
+                        </Breadcrumb>
                     </div>
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                    {children}
+                    {userInfo.role === "admin" ? admin : user}
                 </div>
             </SidebarInset>
         </SidebarProvider>
