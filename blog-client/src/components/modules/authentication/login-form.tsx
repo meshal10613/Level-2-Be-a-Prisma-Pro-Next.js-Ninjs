@@ -18,17 +18,22 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { FcGoogle } from "react-icons/fc";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const handleGoogleLogin = async () => {
-        const data = await authClient.signIn.social({
+        await authClient.signIn.social({
             provider: "google",
             callbackURL: "http://localhost:3000"
         });
+        
     };
+
+    const { data: session } = authClient.useSession();
+    console.log(session)
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -73,7 +78,7 @@ export function LoginForm({
                                     type="button"
                                     className="cursor-pointer"
                                 >
-                                    Login with Google
+                                    <FcGoogle />Login with Google
                                 </Button>
                                 <FieldDescription className="text-center">
                                     Don&apos;t have an account?{" "}
