@@ -8,9 +8,14 @@ export const blogService = {
             const res = await fetch(`${API_URL}/posts`);
             const data = await res.json();
 
-            if (data.success) {
-                return { data, error: null };
+            if (!res.ok || !data.success) {
+                return {
+                    data: null,
+                    error: { message: "Failed to fetch blog posts" },
+                };
             }
+
+            return { data, error: null };
         } catch (error) {
             return {
                 data: null,
