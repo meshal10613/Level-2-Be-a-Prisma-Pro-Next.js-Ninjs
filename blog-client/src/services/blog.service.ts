@@ -6,12 +6,39 @@ const API_URL = env.API_URL;
 //? { cache: no-store } : SSR -> Dynamic Page
 //? next: { revalidate: 10 } : ISR -> Mix between SSR and SSG
 
+interface GetBlogParams {
+    isFeatured?: boolean;
+    search?: string;
+}
+
+interface ServiceOptions {
+    cache?: RequestCache;
+    revalidate?: number;
+}
+
 export const blogService = {
-    getBlogPosts: async () => {
+    getBlogPosts: async (params?: GetBlogParams, options?: ServiceOptions) => {
         try {
-            const res = await fetch(`${API_URL}/posts`, {
-                next: { revalidate: 10 },
-            });
+            const url = new URL(`${API_URL}/posts`);
+
+            if (params) {
+                Object.entries(params).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null && value !== "") {
+                        url.searchParams.set(key, value);
+                    }
+                });
+            }
+
+            const config: RequestInit = {};
+            if (options?.cache) {
+                config.cache = options.cache;
+            }
+
+            if (options?.revalidate) {
+                config.next = { revalidate: options.revalidate };
+            }
+
+            const res = await fetch(url.toString(), config);
             const data = await res.json();
 
             if (!res.ok || !data.success) {
