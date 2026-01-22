@@ -4,6 +4,8 @@ import { Separator } from "@/components/ui/separator";
 import { blogService } from "@/services/blog.service";
 import { BlogPost } from "@/types";
 
+// export const dynamicParams = false; //? then only staticParams data will be showed on the page. in this case it's 3
+
 export async function generateStaticParams() {
     const { data } = await blogService.getBlogPosts();
 
@@ -18,7 +20,7 @@ export default async function BlogDetailsPage({
     // const { id } = useParams();
     const { id } = await params;
     const { data } = await blogService.getBlogById(id);
-	const blog = data?.data;
+    const blog = data?.data;
     const formattedDate = new Date(blog.createdAt).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
