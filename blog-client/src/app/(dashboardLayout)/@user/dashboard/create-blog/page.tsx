@@ -1,10 +1,11 @@
-import CreateBlogFromServer from "@/components/modules/user/createBlog/createBlogFromServer";
+import CreateBlogFromClient from "@/components/modules/user/createBlog/createBlogFromClient";
 
 export default async function CreateBlogPage() {
 
     return (
         <div>
-            <CreateBlogFromServer />
+			<CreateBlogFromClient/>
+            {/* <CreateBlogFromServer /> */}
         </div>
     );
 }
