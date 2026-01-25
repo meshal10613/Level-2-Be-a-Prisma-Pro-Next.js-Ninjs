@@ -1,9 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
-
 import { cn } from "@/lib/utils";
-
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +19,11 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { ModeToggle } from "./ModeToggle";
+import { User } from "@/types";
+import Image from "next/image";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface MenuItem {
     title: string;
@@ -31,6 +34,7 @@ interface MenuItem {
 }
 
 interface Navbar1Props {
+    user: User | null;
     className?: string;
     logo?: {
         url: string;
@@ -53,6 +57,7 @@ interface Navbar1Props {
 }
 
 const Navbar = ({
+    user,
     logo = {
         url: "https://www.shadcnblocks.com",
         src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
@@ -72,7 +77,7 @@ const Navbar = ({
         {
             title: "Dashboard",
             url: "/dashboard",
-        }
+        },
     ],
     auth = {
         login: { title: "Login", url: "/login" },
@@ -80,6 +85,20 @@ const Navbar = ({
     },
     className,
 }: Navbar1Props) => {
+    const router = useRouter();
+    const handleLogout = async () => {
+        const toastId = toast.loading("Logging out...");
+        try {
+            await authClient.signOut();
+            toast.success("Logged out successfully", { id: toastId });
+
+            // Re-run server components (Navbar, layouts, etc.)
+            router.refresh();
+        } catch (error) {
+            toast.error("Failed to logout", { id: toastId });
+        }
+    };
+
     return (
         <section className={cn("py-4", className)}>
             <div className="container mx-auto px-4">
@@ -107,16 +126,46 @@ const Navbar = ({
                     </div>
                     <div className="flex gap-2">
                         <ModeToggle />
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={auth.login.url}>
-                                {auth.login.title}
-                            </Link>
-                        </Button>
-                        <Button asChild size="sm">
-                            <Link href={auth.signup.url}>
-                                {auth.signup.title}
-                            </Link>
-                        </Button>
+                        {user ? (
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={handleLogout}
+                                    variant={`outline`}
+                                    size={`default`}
+                                    className="cursor-pointer"
+                                >
+                                    Logout
+                                </Button>
+                                <div className="relative w-10 h-10">
+                                    <Image
+                                        src={
+                                            user.image ||
+                                            `https://img.daisyui.com/images/profile/demo/spiderperson@192.webp`
+                                        }
+                                        alt={user.name}
+                                        fill
+                                        className="rounded-full"
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    size="default"
+                                >
+                                    <Link href={auth.login.url}>
+                                        {auth.login.title}
+                                    </Link>
+                                </Button>
+                                <Button asChild size="default">
+                                    <Link href={auth.signup.url}>
+                                        {auth.signup.title}
+                                    </Link>
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </nav>
 
@@ -132,7 +181,7 @@ const Navbar = ({
                             />
                         </a>
                         <div className="flex items-center gap-3">
-                            <ModeToggle/>
+                            <ModeToggle />
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button variant="outline" size="icon">
@@ -161,7 +210,7 @@ const Navbar = ({
                                             className="flex w-full flex-col gap-4"
                                         >
                                             {menu.map((item) =>
-                                                renderMobileMenuItem(item)
+                                                renderMobileMenuItem(item),
                                             )}
                                         </Accordion>
 

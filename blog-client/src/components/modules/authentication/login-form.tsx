@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import z from "zod";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     email: z.email("Invalid email"),
@@ -30,6 +31,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
+    const router = useRouter();
     const form = useForm({
         defaultValues: {
             email: "",
@@ -49,6 +51,8 @@ export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
                 }
 
                 toast.success("Login successful", { id: toastId });
+                router.push("/");
+                router.refresh();
             } catch (error) {
                 toast.error("Something went wrong, please try again.", {
                     id: toastId,
